@@ -287,6 +287,10 @@ function renderLogin() {
 
   document.getElementById("loginForm").addEventListener("submit", async (event) => {
     event.preventDefault();
+    const grade = Number(document.getElementById("gradeInput").value);
+    const classRoom = Number(document.getElementById("classInput").value);
+    const name = document.getElementById("nameInput").value.trim();
+    const phone = document.getElementById("phoneInput").value;
     state.loginError = "";
     clearFlash();
     render();
@@ -295,10 +299,10 @@ function renderLogin() {
       const payload = await apiFetch("/api/login", {
         method: "POST",
         body: JSON.stringify({
-          grade: Number(document.getElementById("gradeInput").value),
-          classRoom: Number(document.getElementById("classInput").value),
-          name: document.getElementById("nameInput").value.trim(),
-          phone: document.getElementById("phoneInput").value,
+          grade,
+          classRoom,
+          name,
+          phone,
         }),
       });
       state.student = payload.student;
