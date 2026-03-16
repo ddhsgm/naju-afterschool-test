@@ -1,7 +1,7 @@
 window.AFTERSCHOOL_DATA = {
   "meta": {
     "schoolName": "나주중앙초등학교",
-    "generatedAt": "2026-03-16 09:45:56",
+    "generatedAt": "2026-03-16 11:24:18",
     "studentCount": 354,
     "missingContactCount": 2,
     "periods": {

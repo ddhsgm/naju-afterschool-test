@@ -112,6 +112,87 @@ function getSelectionsDetail(slotIds) {
   return slotIds.map(getSlotDetail).filter(Boolean);
 }
 
+function parseMoneyValues(text) {
+  return String(text || "")
+    .match(/\d[\d,]*/g)
+    ?.map((value) => Number(String(value).replace(/,/g, "")))
+    .filter((value) => Number.isFinite(value) && value > 0) || [];
+}
+
+function parseFeeAmount(value) {
+  if (String(value || "").includes("무료")) {
+    return 0;
+  }
+  return parseMoneyValues(value)[0] || 0;
+}
+
+function parseMaterialEstimate(note) {
+  const text = String(note || "").trim();
+  if (!text) {
+    return { min: 0, max: 0 };
+  }
+
+  const values = parseMoneyValues(text);
+  if (!values.length) {
+    return { min: 0, max: 0 };
+  }
+
+  if (text.includes("~") && values.length >= 2) {
+    if (values.length === 2) {
+      return { min: values[0], max: values[1] };
+    }
+    return {
+      min: values[0] + values[1],
+      max: values[0] + values[2],
+    };
+  }
+
+  const total = values.reduce((sum, value) => sum + value, 0);
+  return { min: total, max: total };
+}
+
+function formatMoney(value) {
+  return `${Number(value || 0).toLocaleString("ko-KR")}원`;
+}
+
+function formatMoneyRange(min, max) {
+  if (!min && !max) {
+    return "0원";
+  }
+  if (min === max) {
+    return formatMoney(min);
+  }
+  return `${formatMoney(min)} ~ ${formatMoney(max)}`;
+}
+
+function buildDraftCostSummary() {
+  const summary = getSelectionsDetail(state.draftSelections).reduce(
+    (acc, { course }) => {
+      const feeAmount = parseFeeAmount(course.fee);
+      const material = parseMaterialEstimate(course.note);
+      acc.feeAmount += feeAmount;
+      acc.materialMin += material.min;
+      acc.materialMax += material.max;
+      acc.totalMin += feeAmount + material.min;
+      acc.totalMax += feeAmount + material.max;
+      return acc;
+    },
+    {
+      feeAmount: 0,
+      materialMin: 0,
+      materialMax: 0,
+      totalMin: 0,
+      totalMax: 0,
+    }
+  );
+
+  return {
+    feeLabel: formatMoney(summary.feeAmount),
+    materialLabel: formatMoneyRange(summary.materialMin, summary.materialMax),
+    totalLabel: formatMoneyRange(summary.totalMin, summary.totalMax),
+  };
+}
+
 function getConflictingSelection(slotId, selections) {
   const candidate = getSlotDetail(slotId);
   if (!candidate) return null;
@@ -322,6 +403,8 @@ function createSelectedSummary() {
     return `<div class="empty-note">아직 선택한 강좌가 없습니다. 오른쪽 강좌 목록에서 원하는 시간을 눌러 주세요.</div>`;
   }
 
+  const costSummary = buildDraftCostSummary();
+
   return `
     <div class="selected-list">
       ${details
@@ -333,14 +416,36 @@ function createSelectedSummary() {
         `)
         .join("")}
     </div>
+    <div class="summary-meta" style="margin-top:14px;">
+      <div class="summary-item">
+        <label>예상 수강료</label>
+        <strong>${costSummary.feeLabel}</strong>
+      </div>
+      <div class="summary-item">
+        <label>예상 재료비</label>
+        <strong>${costSummary.materialLabel}</strong>
+      </div>
+      <div class="summary-item">
+        <label>예상 총부담</label>
+        <strong>${costSummary.totalLabel}</strong>
+      </div>
+    </div>
   `;
 }
 
 function renderSummaryCard() {
+  const supportNotes = [
+    state.student.careLabel ? `돌봄 ${state.student.careLabel}` : "",
+    state.student.isVoucherEligible ? "3학년 바우처 대상" : "",
+  ].filter(Boolean);
+
   return `
     <section class="summary-card">
       <h2>${state.student.name}</h2>
-      <p class="panel-subtext">${state.student.gradeLabel} ${state.student.classLabel} · 대표 연락처 ${formatPhone(state.student.phoneMasked)}</p>
+      <p class="panel-subtext">
+        ${state.student.gradeLabel} ${state.student.classLabel} · 대표 연락처 ${formatPhone(state.student.phoneMasked)}
+        ${supportNotes.length ? `<br>${supportNotes.join(" · ")}` : ""}
+      </p>
       <div class="summary-meta">
         <div class="summary-item">
           <label>현재 선택</label>

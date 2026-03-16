@@ -55,7 +55,7 @@ function renderAdminLogin() {
   adminRoot.innerHTML = `
     <section class="panel">
       <h2>관리자 로그인</h2>
-      <p class="panel-subtext">기본 비밀번호는 서버 설정값입니다. 운영 전에는 반드시 변경해 주세요.</p>
+      <p class="panel-subtext">관리자 비밀번호를 입력하면 신청 현황과 엑셀 다운로드 화면이 열립니다.</p>
       <form id="adminLoginForm">
         <div class="login-grid" style="grid-template-columns:minmax(0, 420px);">
           <div class="field">
@@ -68,7 +68,7 @@ function renderAdminLogin() {
           <a class="text-link" href="/index.html">학부모 화면</a>
         </div>
       </form>
-      ${adminState.loginError ? `<div class="inline-message error">${adminState.loginError}</div>` : ""}
+      ${adminState.loginError ? `<div class="inline-message error">${adminEscapeHtml(adminState.loginError)}</div>` : ""}
     </section>
   `;
 
@@ -94,11 +94,30 @@ function renderMissingContacts(items) {
   if (!items.length) {
     return `<div class="empty-note">연락처 누락 학생이 없습니다.</div>`;
   }
+
   return `
     <div class="selected-list">
       ${items.map((item) => `<div class="selected-pill"><strong>${adminEscapeHtml(item)}</strong></div>`).join("")}
     </div>
   `;
+}
+
+function renderSelectionLines(student) {
+  if (!student.selections.length) {
+    return '<span class="empty-note">미신청</span>';
+  }
+
+  return student.selections
+    .map(
+      (selection) => `
+        <div class="admin-selection-line">
+          <strong>${adminEscapeHtml(selection.courseName)} ${adminEscapeHtml(selection.period)}</strong>
+          <span>${adminEscapeHtml(selection.days.join(", "))} · ${adminEscapeHtml(selection.start)}~${adminEscapeHtml(selection.end)}</span>
+          <span>수강료 ${adminEscapeHtml(selection.feeLabel)} / 재료비 ${adminEscapeHtml(selection.materialCostLabel)} / 합계 ${adminEscapeHtml(selection.totalLabel)}</span>
+        </div>
+      `
+    )
+    .join("");
 }
 
 function renderStudentRows() {
@@ -110,29 +129,33 @@ function renderStudentRows() {
       student.gradeLabel,
       student.classLabel,
       student.phoneMasked,
+      student.careLabel,
+      student.remark,
       student.selections.map((selection) => `${selection.courseName} ${selection.period}`).join(" "),
     ].join(" ");
     return haystack.includes(keyword);
   });
 
   if (!filtered.length) {
-    return `<tr><td colspan="6" class="admin-empty">검색 결과가 없습니다.</td></tr>`;
+    return `<tr><td colspan="8" class="admin-empty">검색 결과가 없습니다.</td></tr>`;
   }
 
-  return filtered.map((student) => `
-    <tr>
-      <td>${adminEscapeHtml(student.gradeLabel)} ${adminEscapeHtml(student.classLabel)}</td>
-      <td>${adminEscapeHtml(student.name)}</td>
-      <td>${adminEscapeHtml(student.phoneMasked)}</td>
-      <td>${student.selections.length}</td>
-      <td>${student.selections.map((selection) => `
-        <div class="admin-selection-line">
-          ${adminEscapeHtml(selection.courseName)} ${adminEscapeHtml(selection.period)} · ${adminEscapeHtml(selection.days.join(", "))} · ${adminEscapeHtml(selection.start)}~${adminEscapeHtml(selection.end)}
-        </div>
-      `).join("") || '<span class="empty-note">미신청</span>'}</td>
-      <td>${adminEscapeHtml(student.updatedAtLabel || "-")}</td>
-    </tr>
-  `).join("");
+  return filtered
+    .map(
+      (student) => `
+        <tr>
+          <td>${adminEscapeHtml(student.gradeLabel)} ${adminEscapeHtml(student.classLabel)}</td>
+          <td>${adminEscapeHtml(student.name)}</td>
+          <td>${adminEscapeHtml(student.phoneMasked)}</td>
+          <td>${adminEscapeHtml(student.careLabel || "-")}</td>
+          <td>${student.selections.length}</td>
+          <td>${renderSelectionLines(student)}</td>
+          <td>${adminEscapeHtml(student.costSummary.totalLabel)}</td>
+          <td>${adminEscapeHtml(student.updatedAtLabel || "-")}</td>
+        </tr>
+      `
+    )
+    .join("");
 }
 
 function renderAdminDashboard() {
@@ -144,18 +167,18 @@ function renderAdminDashboard() {
       <div class="toolbar">
         <div class="toolbar-copy">
           <h2>신청 현황</h2>
-          <p>학생별 신청 내역과 연락처 누락 학생을 확인할 수 있습니다.</p>
+          <p>학부모가 저장한 신청 내역을 보고, 샘플 서식에 맞춘 엑셀을 바로 내려받을 수 있습니다.</p>
         </div>
         <div class="toolbar-actions">
-          <a class="text-link" href="${adminState.summary.exportUrl}">CSV 내려받기</a>
-          <button class="btn-secondary" id="adminReloadDataBtn" type="button">원본자료 다시 불러오기</button>
+          <a class="text-link" href="${adminState.summary.exportUrl}">엑셀 다운로드</a>
+          <button class="btn-secondary" id="adminReloadDataBtn" type="button">원본자료 다시 반영</button>
           <button class="btn-secondary" id="adminLogoutBtn" type="button">로그아웃</button>
         </div>
       </div>
-      ${adminState.error ? `<div class="inline-message error">${adminState.error}</div>` : ""}
+      ${adminState.error ? `<div class="inline-message error">${adminEscapeHtml(adminState.error)}</div>` : ""}
       <div class="summary-matrix">
         <div class="summary-card">
-          <h2>요약</h2>
+          <h2>기본 현황</h2>
           <div class="summary-meta">
             <div class="summary-item">
               <label>로그인 가능 학생</label>
@@ -166,8 +189,29 @@ function renderAdminDashboard() {
               <strong>${adminState.summary.appliedStudentCount}명</strong>
             </div>
             <div class="summary-item">
+              <label>총 선택 건수</label>
+              <strong>${adminState.summary.selectionCount}건</strong>
+            </div>
+            <div class="summary-item">
               <label>연락처 누락</label>
               <strong>${adminState.summary.missingContacts.length}명</strong>
+            </div>
+          </div>
+        </div>
+        <div class="summary-card">
+          <h2>예상 비용 합계</h2>
+          <div class="summary-meta">
+            <div class="summary-item">
+              <label>수강료 합계</label>
+              <strong>${adminEscapeHtml(adminState.summary.totalCostSummary.feeLabel)}</strong>
+            </div>
+            <div class="summary-item">
+              <label>재료비 합계</label>
+              <strong>${adminEscapeHtml(adminState.summary.totalCostSummary.materialCostLabel)}</strong>
+            </div>
+            <div class="summary-item">
+              <label>총 부담 합계</label>
+              <strong>${adminEscapeHtml(adminState.summary.totalCostSummary.totalLabel)}</strong>
             </div>
           </div>
         </div>
@@ -177,7 +221,7 @@ function renderAdminDashboard() {
         </div>
       </div>
       <div class="search-toolbar" style="margin-top:18px;">
-        <input id="adminSearchInput" class="search-input" type="search" placeholder="학생명, 연락처, 강좌명 검색" value="${adminEscapeHtml(adminState.search)}">
+        <input id="adminSearchInput" class="search-input" type="search" placeholder="학생명, 연락처, 강좌명으로 검색" value="${adminEscapeHtml(adminState.search)}">
       </div>
       <div class="admin-table-wrap">
         <table class="admin-table">
@@ -186,9 +230,11 @@ function renderAdminDashboard() {
               <th>학년반</th>
               <th>이름</th>
               <th>연락처</th>
-              <th>신청수</th>
+              <th>돌봄</th>
+              <th>신청 수</th>
               <th>신청 내역</th>
-              <th>저장 시각</th>
+              <th>예상 총부담</th>
+              <th>최종 저장</th>
             </tr>
           </thead>
           <tbody>
@@ -230,6 +276,7 @@ function renderAdminDashboard() {
 async function loadAdminSummary() {
   adminState.loading = true;
   renderAdminLoading();
+
   try {
     adminState.summary = await adminFetch("/api/admin/summary", { method: "GET" });
     adminState.loading = false;
