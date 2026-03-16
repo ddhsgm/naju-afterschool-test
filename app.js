@@ -166,6 +166,14 @@ function formatMoneyRange(min, max) {
 }
 
 function buildDraftCostSummary() {
+  if (state.student?.isFreePassEligible || state.student?.isVoucherEligible) {
+    return {
+      feeLabel: "0원",
+      materialLabel: "0원",
+      totalLabel: "0원",
+    };
+  }
+
   const summary = getSelectionsDetail(state.draftSelections).reduce(
     (acc, { course }) => {
       const feeAmount = parseFeeAmount(course.fee);

@@ -152,11 +152,11 @@ function buildCourseSheets(bootstrap, summary) {
 
     courseSelections.forEach(({ student, selection }, index) => {
       const materialCostValue =
-        selection.materialCostMin === 0 && selection.materialCostMax === 0
+        selection.baseMaterialCostMin === 0 && selection.baseMaterialCostMax === 0
           ? "-"
-          : selection.materialCostMin === selection.materialCostMax
-            ? selection.materialCostMin
-            : selection.materialCostLabel;
+          : selection.baseMaterialCostMin === selection.baseMaterialCostMax
+            ? selection.baseMaterialCostMin
+            : selection.baseMaterialCostLabel;
 
       const totalValue =
         selection.totalMin === 0 && selection.totalMax === 0
@@ -176,11 +176,11 @@ function buildCourseSheets(bootstrap, summary) {
             student.careLabel || "",
             student.phoneMasked,
             selection.period,
-            selection.feeAmount > 0 ? selection.feeAmount : "무료",
+            selection.baseFeeAmount > 0 ? selection.baseFeeAmount : "무료",
             selection.materialItemLabel || "-",
             materialCostValue,
             totalValue,
-            student.remark || "",
+            [student.remark, selection.supportLabel].filter(Boolean).join(" / "),
           ],
           "Body"
         )

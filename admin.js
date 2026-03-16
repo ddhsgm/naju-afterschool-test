@@ -114,6 +114,7 @@ function renderSelectionLines(student) {
           <strong>${adminEscapeHtml(selection.courseName)} ${adminEscapeHtml(selection.period)}</strong>
           <span>${adminEscapeHtml(selection.days.join(", "))} · ${adminEscapeHtml(selection.start)}~${adminEscapeHtml(selection.end)}</span>
           <span>수강료 ${adminEscapeHtml(selection.feeLabel)} / 재료비 ${adminEscapeHtml(selection.materialCostLabel)} / 합계 ${adminEscapeHtml(selection.totalLabel)}</span>
+          ${selection.supportLabel ? `<span>${adminEscapeHtml(selection.supportLabel)}</span>` : ""}
         </div>
       `
     )

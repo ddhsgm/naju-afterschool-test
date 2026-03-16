@@ -144,16 +144,16 @@ function buildCourseCost(course) {
   const feeAmount = parseFeeAmount(course.fee);
   const material = parseMaterialEstimate(course.note);
   return {
-    feeAmount,
-    feeLabel: course.fee,
+    baseFeeAmount: feeAmount,
+    baseFeeLabel: course.fee,
     materialItemLabel: detectMaterialItemLabel(course.note),
-    materialCostMin: material.min,
-    materialCostMax: material.max,
-    materialCostLabel: material.hasEstimate ? formatMoneyRange(material.min, material.max) : "-",
+    baseMaterialCostMin: material.min,
+    baseMaterialCostMax: material.max,
+    baseMaterialCostLabel: material.hasEstimate ? formatMoneyRange(material.min, material.max) : "-",
     materialGuideLabel: material.label,
     hasMaterialEstimate: material.hasEstimate,
-    totalMin: feeAmount + material.min,
-    totalMax: feeAmount + material.max,
+    baseTotalMin: feeAmount + material.min,
+    baseTotalMax: feeAmount + material.max,
   };
 }
 
@@ -200,7 +200,26 @@ function getSlotCatalog() {
   return catalog;
 }
 
-function buildSelectionDetail(record) {
+function buildSelectionDetail(record, student) {
+  const baseFeeAmount = record.cost.baseFeeAmount;
+  const baseMaterialCostMin = record.cost.baseMaterialCostMin;
+  const baseMaterialCostMax = record.cost.baseMaterialCostMax;
+  const supportReasons = [];
+
+  if (isFreePassEligible(student.id)) {
+    supportReasons.push("자유수강권 적용");
+  }
+  if (isVoucherEligible(student.grade)) {
+    supportReasons.push("3학년 바우처 적용");
+  }
+
+  const supportCoversTotal = supportReasons.length > 0 && (baseFeeAmount > 0 || baseMaterialCostMax > 0);
+  const feeAmount = supportCoversTotal ? 0 : baseFeeAmount;
+  const materialCostMin = supportCoversTotal ? 0 : baseMaterialCostMin;
+  const materialCostMax = supportCoversTotal ? 0 : baseMaterialCostMax;
+  const totalMin = feeAmount + materialCostMin;
+  const totalMax = feeAmount + materialCostMax;
+
   return {
     slotId: record.slot.id,
     courseId: record.course.id,
@@ -211,17 +230,23 @@ function buildSelectionDetail(record) {
     end: record.slot.end,
     room: record.slot.room || record.course.room || "",
     teacher: record.course.teacher || "",
-    feeAmount: record.cost.feeAmount,
-    feeLabel: record.cost.feeLabel,
+    baseFeeAmount,
+    baseFeeLabel: record.cost.baseFeeLabel,
+    feeAmount,
+    feeLabel: feeAmount > 0 ? formatMoney(feeAmount) : "0원",
     materialItemLabel: record.cost.materialItemLabel,
-    materialCostMin: record.cost.materialCostMin,
-    materialCostMax: record.cost.materialCostMax,
-    materialCostLabel: record.cost.materialCostLabel,
+    baseMaterialCostMin,
+    baseMaterialCostMax,
+    baseMaterialCostLabel: record.cost.baseMaterialCostLabel,
+    materialCostMin,
+    materialCostMax,
+    materialCostLabel: formatMoneyRange(materialCostMin, materialCostMax),
     materialGuideLabel: record.cost.materialGuideLabel,
     hasMaterialEstimate: record.cost.hasMaterialEstimate,
-    totalMin: record.cost.totalMin,
-    totalMax: record.cost.totalMax,
-    totalLabel: formatMoneyRange(record.cost.totalMin, record.cost.totalMax),
+    totalMin,
+    totalMax,
+    totalLabel: formatMoneyRange(totalMin, totalMax),
+    supportLabel: supportReasons.join(" / "),
   };
 }
 
@@ -301,7 +326,7 @@ async function getStudentPayload(studentId) {
   const detailedSelections = selections
     .map((slotId) => catalog[slotId])
     .filter(Boolean)
-    .map(buildSelectionDetail);
+    .map((record) => buildSelectionDetail(record, student));
 
   return {
     student: {
@@ -366,7 +391,7 @@ async function buildAdminSummary() {
         room: slot.room || course.room || "",
       },
       cost: course.cost,
-    });
+    }, { id: "__placeholder__", grade: 0 });
   });
 
   const grouped = {};
@@ -381,7 +406,25 @@ async function buildAdminSummary() {
     const rows = grouped[student.id] || [];
     const latest = rows.reduce((max, row) => (!max || row.updated_at > max ? row.updated_at : max), "");
     const detailedSelections = rows
-      .map((row) => slotMap[row.slot_id])
+      .map((row) => {
+        const slotDetail = slotMap[row.slot_id];
+        if (!slotDetail) return null;
+        return buildSelectionDetail(
+          {
+            course: courseMap[slotDetail.courseId],
+            slot: {
+              id: slotDetail.slotId,
+              period: slotDetail.period,
+              start: slotDetail.start,
+              end: slotDetail.end,
+              days: slotDetail.days,
+              room: slotDetail.room,
+            },
+            cost: courseMap[slotDetail.courseId].cost,
+          },
+          student
+        );
+      })
       .filter(Boolean)
       .sort((a, b) => a.courseName.localeCompare(b.courseName, "ko") || a.period.localeCompare(b.period, "ko"));
 
