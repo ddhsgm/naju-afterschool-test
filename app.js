@@ -436,6 +436,7 @@ function createSelectedSummary() {
 function renderSummaryCard() {
   const supportNotes = [
     state.student.careLabel ? `돌봄 ${state.student.careLabel}` : "",
+    state.student.isFreePassEligible ? `자유수강권 대상${state.student.freePassInfo?.supportTotal ? ` · 작년 지원액 ${formatMoney(state.student.freePassInfo.supportTotal)}` : ""}` : "",
     state.student.isVoucherEligible ? "3학년 바우처 대상" : "",
   ].filter(Boolean);
 

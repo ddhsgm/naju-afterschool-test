@@ -131,6 +131,7 @@ function renderStudentRows() {
       student.phoneMasked,
       student.careLabel,
       student.remark,
+      student.isFreePassEligible ? "자유수강권" : "",
       student.selections.map((selection) => `${selection.courseName} ${selection.period}`).join(" "),
     ].join(" ");
     return haystack.includes(keyword);

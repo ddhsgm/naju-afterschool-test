@@ -9,12 +9,23 @@ function getCareLabel(studentId) {
   return getSupportData().careByStudentId?.[studentId] || "";
 }
 
+function getFreePassInfo(studentId) {
+  return getSupportData().freePassByStudentId?.[studentId] || null;
+}
+
+function isFreePassEligible(studentId) {
+  return Boolean(getFreePassInfo(studentId));
+}
+
 function isVoucherEligible(grade) {
   return Array.isArray(getSupportData().voucherGrades) && getSupportData().voucherGrades.includes(Number(grade));
 }
 
 function buildRemark(student, selections) {
   const remarks = [];
+  if (isFreePassEligible(student.id)) {
+    remarks.push("자유수강권 대상");
+  }
   if (isVoucherEligible(student.grade) && selections.length) {
     remarks.push("3학년 바우처 대상");
   }
@@ -302,8 +313,10 @@ async function getStudentPayload(studentId) {
       classLabel: student.class_label,
       numberLabel: student.number_label || "",
       careLabel: getCareLabel(student.id),
+      freePassInfo: getFreePassInfo(student.id),
       phoneMasked: maskPhone(student.phone),
       updatedAtLabel: formatDateLabel(updatedAt),
+      isFreePassEligible: isFreePassEligible(student.id),
       isVoucherEligible: isVoucherEligible(student.grade),
     },
     selections,
@@ -381,9 +394,11 @@ async function buildAdminSummary() {
       classLabel: student.class_label,
       numberLabel: student.number_label || "",
       careLabel: getCareLabel(student.id),
+      freePassInfo: getFreePassInfo(student.id),
       phone: student.phone,
       phoneMasked: maskPhone(student.phone),
       updatedAtLabel: formatDateLabel(latest),
+      isFreePassEligible: isFreePassEligible(student.id),
       isVoucherEligible: isVoucherEligible(student.grade),
       remark: buildRemark(student, detailedSelections),
       selections: detailedSelections,

@@ -1,7 +1,7 @@
 {
   "meta": {
     "schoolName": "나주중앙초등학교",
-    "generatedAt": "2026-03-16 11:24:18",
+    "generatedAt": "2026-03-16 11:37:50",
     "studentCount": 354,
     "missingContactCount": 2,
     "periods": {
@@ -906,6 +906,362 @@
       "2-3-김연희": "돌봄2반",
       "2-3-박도윤": "돌봄2반",
       "2-3-이로운": "돌봄2반"
+    },
+    "freePassByStudentId": {
+      "2-3-김연희": {
+        "matchedFromYear": 2025,
+        "supportTotal": 448000,
+        "sourceGrade": 1,
+        "currentGrade": 2
+      },
+      "2-1-김지현": {
+        "matchedFromYear": 2025,
+        "supportTotal": 0,
+        "sourceGrade": 1,
+        "currentGrade": 2
+      },
+      "2-2-송예담": {
+        "matchedFromYear": 2025,
+        "supportTotal": 120000,
+        "sourceGrade": 1,
+        "currentGrade": 2
+      },
+      "2-1-노유진": {
+        "matchedFromYear": 2025,
+        "supportTotal": 688000,
+        "sourceGrade": 1,
+        "currentGrade": 2
+      },
+      "2-1-강하엘": {
+        "matchedFromYear": 2025,
+        "supportTotal": 908000,
+        "sourceGrade": 1,
+        "currentGrade": 2
+      },
+      "2-2-박은혜": {
+        "matchedFromYear": 2025,
+        "supportTotal": 1376800,
+        "sourceGrade": 1,
+        "currentGrade": 2
+      },
+      "2-3-엄태희": {
+        "matchedFromYear": 2025,
+        "supportTotal": 46800,
+        "sourceGrade": 1,
+        "currentGrade": 2
+      },
+      "3-1-박상민": {
+        "matchedFromYear": 2025,
+        "supportTotal": 624000,
+        "sourceGrade": 2,
+        "currentGrade": 3
+      },
+      "3-2-배시현": {
+        "matchedFromYear": 2025,
+        "supportTotal": 404000,
+        "sourceGrade": 2,
+        "currentGrade": 3
+      },
+      "3-2-이서율": {
+        "matchedFromYear": 2025,
+        "supportTotal": 0,
+        "sourceGrade": 2,
+        "currentGrade": 3
+      },
+      "3-2-조민건": {
+        "matchedFromYear": 2025,
+        "supportTotal": 0,
+        "sourceGrade": 2,
+        "currentGrade": 3
+      },
+      "3-2-황동하": {
+        "matchedFromYear": 2025,
+        "supportTotal": 262000,
+        "sourceGrade": 2,
+        "currentGrade": 3
+      },
+      "3-2-김태윤": {
+        "matchedFromYear": 2025,
+        "supportTotal": 176000,
+        "sourceGrade": 2,
+        "currentGrade": 3
+      },
+      "3-2-박은총": {
+        "matchedFromYear": 2025,
+        "supportTotal": 1526800,
+        "sourceGrade": 2,
+        "currentGrade": 3
+      },
+      "3-2-변우빈": {
+        "matchedFromYear": 2025,
+        "supportTotal": 0,
+        "sourceGrade": 2,
+        "currentGrade": 3
+      },
+      "3-1-윤한울": {
+        "matchedFromYear": 2025,
+        "supportTotal": 202000,
+        "sourceGrade": 2,
+        "currentGrade": 3
+      },
+      "3-2-이서은": {
+        "matchedFromYear": 2025,
+        "supportTotal": 92000,
+        "sourceGrade": 2,
+        "currentGrade": 3
+      },
+      "4-2-공서빈": {
+        "matchedFromYear": 2025,
+        "supportTotal": 722000,
+        "sourceGrade": 3,
+        "currentGrade": 4
+      },
+      "4-3-김동빈": {
+        "matchedFromYear": 2025,
+        "supportTotal": 1412000,
+        "sourceGrade": 3,
+        "currentGrade": 4
+      },
+      "4-1-김선우": {
+        "matchedFromYear": 2025,
+        "supportTotal": 798800,
+        "sourceGrade": 3,
+        "currentGrade": 4
+      },
+      "4-1-김승아": {
+        "matchedFromYear": 2025,
+        "supportTotal": 348800,
+        "sourceGrade": 3,
+        "currentGrade": 4
+      },
+      "4-1-송민서": {
+        "matchedFromYear": 2025,
+        "supportTotal": 800000,
+        "sourceGrade": 3,
+        "currentGrade": 4
+      },
+      "4-3-정다빈": {
+        "matchedFromYear": 2025,
+        "supportTotal": 0,
+        "sourceGrade": 3,
+        "currentGrade": 4
+      },
+      "4-3-정윤서": {
+        "matchedFromYear": 2025,
+        "supportTotal": 0,
+        "sourceGrade": 3,
+        "currentGrade": 4
+      },
+      "4-1-정하준": {
+        "matchedFromYear": 2025,
+        "supportTotal": 660000,
+        "sourceGrade": 3,
+        "currentGrade": 4
+      },
+      "4-1-홍준영": {
+        "matchedFromYear": 2025,
+        "supportTotal": 0,
+        "sourceGrade": 3,
+        "currentGrade": 4
+      },
+      "4-1-노유민": {
+        "matchedFromYear": 2025,
+        "supportTotal": 1794000,
+        "sourceGrade": 3,
+        "currentGrade": 4
+      },
+      "4-1-이지수": {
+        "matchedFromYear": 2025,
+        "supportTotal": 1072000,
+        "sourceGrade": 3,
+        "currentGrade": 4
+      },
+      "4-2-전하준": {
+        "matchedFromYear": 2025,
+        "supportTotal": 120000,
+        "sourceGrade": 3,
+        "currentGrade": 4
+      },
+      "4-2-정수빈": {
+        "matchedFromYear": 2025,
+        "supportTotal": 0,
+        "sourceGrade": 3,
+        "currentGrade": 4
+      },
+      "4-2-최범준": {
+        "matchedFromYear": 2025,
+        "supportTotal": 810800,
+        "sourceGrade": 3,
+        "currentGrade": 4
+      },
+      "4-3-한서준": {
+        "matchedFromYear": 2025,
+        "supportTotal": 0,
+        "sourceGrade": 3,
+        "currentGrade": 4
+      },
+      "5-1-김선희": {
+        "matchedFromYear": 2025,
+        "supportTotal": 0,
+        "sourceGrade": 4,
+        "currentGrade": 5
+      },
+      "5-1-이민호": {
+        "matchedFromYear": 2025,
+        "supportTotal": 0,
+        "sourceGrade": 4,
+        "currentGrade": 5
+      },
+      "5-2-주준혁": {
+        "matchedFromYear": 2025,
+        "supportTotal": 1009000,
+        "sourceGrade": 4,
+        "currentGrade": 5
+      },
+      "5-3-김도운": {
+        "matchedFromYear": 2025,
+        "supportTotal": 0,
+        "sourceGrade": 4,
+        "currentGrade": 5
+      },
+      "5-2-박찬혁": {
+        "matchedFromYear": 2025,
+        "supportTotal": 678000,
+        "sourceGrade": 4,
+        "currentGrade": 5
+      },
+      "5-2-이준형": {
+        "matchedFromYear": 2025,
+        "supportTotal": 690000,
+        "sourceGrade": 4,
+        "currentGrade": 5
+      },
+      "5-1-장다은": {
+        "matchedFromYear": 2025,
+        "supportTotal": 0,
+        "sourceGrade": 4,
+        "currentGrade": 5
+      },
+      "5-3-김연재": {
+        "matchedFromYear": 2025,
+        "supportTotal": 1168000,
+        "sourceGrade": 4,
+        "currentGrade": 5
+      },
+      "5-2-엄주희": {
+        "matchedFromYear": 2025,
+        "supportTotal": 334800,
+        "sourceGrade": 4,
+        "currentGrade": 5
+      },
+      "5-3-하성우": {
+        "matchedFromYear": 2025,
+        "supportTotal": 0,
+        "sourceGrade": 4,
+        "currentGrade": 5
+      },
+      "6-1-강희성": {
+        "matchedFromYear": 2025,
+        "supportTotal": 0,
+        "sourceGrade": 5,
+        "currentGrade": 6
+      },
+      "6-3-엄준": {
+        "matchedFromYear": 2025,
+        "supportTotal": 1394000,
+        "sourceGrade": 5,
+        "currentGrade": 6
+      },
+      "6-1-강소희": {
+        "matchedFromYear": 2025,
+        "supportTotal": 0,
+        "sourceGrade": 5,
+        "currentGrade": 6
+      },
+      "6-3-김동윤": {
+        "matchedFromYear": 2025,
+        "supportTotal": 1388000,
+        "sourceGrade": 5,
+        "currentGrade": 6
+      },
+      "6-3-김연아": {
+        "matchedFromYear": 2025,
+        "supportTotal": 0,
+        "sourceGrade": 5,
+        "currentGrade": 6
+      },
+      "6-2-김성연": {
+        "matchedFromYear": 2025,
+        "supportTotal": 0,
+        "sourceGrade": 5,
+        "currentGrade": 6
+      },
+      "6-3-김승현": {
+        "matchedFromYear": 2025,
+        "supportTotal": 0,
+        "sourceGrade": 5,
+        "currentGrade": 6
+      },
+      "6-2-민주성": {
+        "matchedFromYear": 2025,
+        "supportTotal": 0,
+        "sourceGrade": 5,
+        "currentGrade": 6
+      },
+      "6-1-박태영": {
+        "matchedFromYear": 2025,
+        "supportTotal": 660000,
+        "sourceGrade": 5,
+        "currentGrade": 6
+      },
+      "6-2-전하민": {
+        "matchedFromYear": 2025,
+        "supportTotal": 0,
+        "sourceGrade": 5,
+        "currentGrade": 6
+      },
+      "6-2-하소희": {
+        "matchedFromYear": 2025,
+        "supportTotal": 0,
+        "sourceGrade": 5,
+        "currentGrade": 6
+      },
+      "6-3-한수진": {
+        "matchedFromYear": 2025,
+        "supportTotal": 0,
+        "sourceGrade": 5,
+        "currentGrade": 6
+      },
+      "2-3-손도담": {
+        "matchedFromYear": 2025,
+        "supportTotal": 0,
+        "sourceGrade": 1,
+        "currentGrade": 2
+      },
+      "3-2-최세하": {
+        "matchedFromYear": 2025,
+        "supportTotal": 0,
+        "sourceGrade": 2,
+        "currentGrade": 3
+      },
+      "5-1-김시원": {
+        "matchedFromYear": 2025,
+        "supportTotal": 454000,
+        "sourceGrade": 4,
+        "currentGrade": 5
+      },
+      "3-1-이정우": {
+        "matchedFromYear": 2025,
+        "supportTotal": 176000,
+        "sourceGrade": 2,
+        "currentGrade": 3
+      },
+      "6-2-윤예인": {
+        "matchedFromYear": 2025,
+        "supportTotal": 0,
+        "sourceGrade": 5,
+        "currentGrade": 6
+      }
     },
     "voucherGrades": [
       3
