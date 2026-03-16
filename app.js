@@ -199,44 +199,42 @@ function buildDraftCostSummary() {
     }
   );
 
-  const supportCoversTotal = state.student?.isFreePassEligible || state.student?.isVoucherEligible;
-
-  if (supportCoversTotal) {
-    summary.feeAmount = 0;
-    summary.materialMin = 0;
-    summary.materialMax = 0;
-    summary.totalMin = 0;
-    summary.totalMax = 0;
-  }
-
   return {
+    ...summary,
     baseFeeLabel: formatMoney(summary.baseFeeAmount),
     baseMaterialLabel: formatMoneyRange(summary.baseMaterialMin, summary.baseMaterialMax),
     baseTotalLabel: formatMoneyRange(summary.baseTotalMin, summary.baseTotalMax),
-    feeLabel: formatMoney(summary.feeAmount),
-    materialLabel: formatMoneyRange(summary.materialMin, summary.materialMax),
-    totalLabel: formatMoneyRange(summary.totalMin, summary.totalMax),
-    supportAppliedLabel: formatMoneyRange(summary.baseTotalMin - summary.totalMin, summary.baseTotalMax - summary.totalMax),
   };
 }
 
-function buildDraftVoucherPreview(costSummary) {
-  if (!state.student?.isVoucherEligible) {
-    return null;
-  }
+function buildSupportPreview(costSummary) {
+  const baseTotalMin = costSummary.baseTotalMin || 0;
+  const baseTotalMax = costSummary.baseTotalMax || 0;
+  const freePassBudget = Number(state.student?.freePassInfo?.supportTotal || 0);
 
-  const usedMin = costSummary.baseTotalMin || 0;
-  const usedMax = costSummary.baseTotalMax || 0;
+  const voucherAppliedMin = state.student?.isVoucherEligible ? Math.min(baseTotalMin, VOUCHER_QUARTER_LIMIT) : 0;
+  const voucherAppliedMax = state.student?.isVoucherEligible ? Math.min(baseTotalMax, VOUCHER_QUARTER_LIMIT) : 0;
+  const remainingAfterVoucherMin = Math.max(0, baseTotalMin - voucherAppliedMin);
+  const remainingAfterVoucherMax = Math.max(0, baseTotalMax - voucherAppliedMax);
+  const freePassAppliedMin = state.student?.isFreePassEligible ? Math.min(remainingAfterVoucherMin, freePassBudget) : 0;
+  const freePassAppliedMax = state.student?.isFreePassEligible ? Math.min(remainingAfterVoucherMax, freePassBudget) : 0;
+  const finalPayableMin = Math.max(0, remainingAfterVoucherMin - freePassAppliedMin);
+  const finalPayableMax = Math.max(0, remainingAfterVoucherMax - freePassAppliedMax);
 
   return {
-    usedLabel: formatMoneyRange(usedMin, usedMax),
+    voucherAppliedLabel: formatMoneyRange(voucherAppliedMin, voucherAppliedMax),
+    freePassBudgetLabel: formatMoney(freePassBudget),
+    freePassAppliedLabel: formatMoneyRange(freePassAppliedMin, freePassAppliedMax),
+    finalPayableLabel: formatMoneyRange(finalPayableMin, finalPayableMax),
+    totalSupportLabel: formatMoneyRange(voucherAppliedMin + freePassAppliedMin, voucherAppliedMax + freePassAppliedMax),
+    usedLabel: formatMoneyRange(voucherAppliedMin, voucherAppliedMax),
     quarterRemainingLabel: formatMoneyRange(
-      Math.max(0, VOUCHER_QUARTER_LIMIT - usedMax),
-      Math.max(0, VOUCHER_QUARTER_LIMIT - usedMin)
+      Math.max(0, VOUCHER_QUARTER_LIMIT - voucherAppliedMax),
+      Math.max(0, VOUCHER_QUARTER_LIMIT - voucherAppliedMin)
     ),
     yearRemainingLabel: formatMoneyRange(
-      Math.max(0, VOUCHER_YEAR_LIMIT - usedMax),
-      Math.max(0, VOUCHER_YEAR_LIMIT - usedMin)
+      Math.max(0, VOUCHER_YEAR_LIMIT - voucherAppliedMax),
+      Math.max(0, VOUCHER_YEAR_LIMIT - voucherAppliedMin)
     ),
   };
 }
@@ -452,7 +450,7 @@ function createSelectedSummary() {
   }
 
   const costSummary = buildDraftCostSummary();
-  const voucherPreview = buildDraftVoucherPreview(costSummary);
+  const supportPreview = buildSupportPreview(costSummary);
 
   return `
     <div class="selected-list">
@@ -471,29 +469,50 @@ function createSelectedSummary() {
         <strong>${costSummary.baseTotalLabel}</strong>
       </div>
       <div class="summary-item">
-        <label>지원 적용액</label>
-        <strong>${costSummary.supportAppliedLabel}</strong>
+        <label>바우처 적용액</label>
+        <strong>${supportPreview.voucherAppliedLabel}</strong>
       </div>
       <div class="summary-item">
-        <label>최종 예상 부담</label>
-        <strong>${costSummary.totalLabel}</strong>
+        <label>자유수강권 적용액</label>
+        <strong>${supportPreview.freePassAppliedLabel}</strong>
       </div>
     </div>
     ${
-      voucherPreview
+      state.student?.isVoucherEligible || state.student?.isFreePassEligible
+        ? `
+          <div class="summary-meta" style="margin-top:14px;">
+            <div class="summary-item">
+              <label>총 지원 적용액</label>
+              <strong>${supportPreview.totalSupportLabel}</strong>
+            </div>
+            <div class="summary-item">
+              <label>최종 예상 부담</label>
+              <strong>${supportPreview.finalPayableLabel}</strong>
+            </div>
+            ${state.student?.isFreePassEligible ? `
+            <div class="summary-item">
+              <label>자유수강권 기준액</label>
+              <strong>${supportPreview.freePassBudgetLabel}</strong>
+            </div>` : ""}
+          </div>
+        `
+        : ""
+    }
+    ${
+      state.student?.isVoucherEligible
         ? `
           <div class="summary-meta" style="margin-top:14px;">
             <div class="summary-item">
               <label>이번 신청 바우처 사용액</label>
-              <strong>${voucherPreview.usedLabel}</strong>
+              <strong>${supportPreview.usedLabel}</strong>
             </div>
             <div class="summary-item">
               <label>분기 예상 잔여</label>
-              <strong>${voucherPreview.quarterRemainingLabel}</strong>
+              <strong>${supportPreview.quarterRemainingLabel}</strong>
             </div>
             <div class="summary-item">
               <label>연간 예상 잔여</label>
-              <strong>${voucherPreview.yearRemainingLabel}</strong>
+              <strong>${supportPreview.yearRemainingLabel}</strong>
             </div>
           </div>
         `
@@ -505,7 +524,7 @@ function createSelectedSummary() {
 function renderSummaryCard() {
   const supportNotes = [
     state.student.careLabel ? `돌봄 ${state.student.careLabel}` : "",
-    state.student.isFreePassEligible ? `자유수강권 대상${state.student.freePassInfo?.supportTotal ? ` · 작년 지원액 ${formatMoney(state.student.freePassInfo.supportTotal)}` : ""}` : "",
+    state.student.isFreePassEligible ? `자유수강권 대상${state.student.freePassInfo?.supportTotal ? ` · 기준액 ${formatMoney(state.student.freePassInfo.supportTotal)}` : ""}` : "",
     state.student.isVoucherEligible ? "3학년 바우처 대상" : "",
   ].filter(Boolean);
 
