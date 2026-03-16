@@ -160,6 +160,11 @@ function buildCourseCost(course) {
 function summarizeSelections(selections) {
   const summary = selections.reduce(
     (acc, selection) => {
+      acc.baseFeeAmount += selection.baseFeeAmount || 0;
+      acc.baseMaterialCostMin += selection.baseMaterialCostMin || 0;
+      acc.baseMaterialCostMax += selection.baseMaterialCostMax || 0;
+      acc.baseTotalMin += (selection.baseFeeAmount || 0) + (selection.baseMaterialCostMin || 0);
+      acc.baseTotalMax += (selection.baseFeeAmount || 0) + (selection.baseMaterialCostMax || 0);
       acc.feeAmount += selection.feeAmount || 0;
       acc.materialCostMin += selection.materialCostMin || 0;
       acc.materialCostMax += selection.materialCostMax || 0;
@@ -171,6 +176,11 @@ function summarizeSelections(selections) {
       return acc;
     },
     {
+      baseFeeAmount: 0,
+      baseMaterialCostMin: 0,
+      baseMaterialCostMax: 0,
+      baseTotalMin: 0,
+      baseTotalMax: 0,
       feeAmount: 0,
       materialCostMin: 0,
       materialCostMax: 0,
@@ -182,9 +192,43 @@ function summarizeSelections(selections) {
 
   return {
     ...summary,
+    baseFeeLabel: formatMoney(summary.baseFeeAmount),
+    baseMaterialCostLabel: formatMoneyRange(summary.baseMaterialCostMin, summary.baseMaterialCostMax),
+    baseTotalLabel: formatMoneyRange(summary.baseTotalMin, summary.baseTotalMax),
+    supportAppliedMin: Math.max(0, summary.baseTotalMin - summary.totalMin),
+    supportAppliedMax: Math.max(0, summary.baseTotalMax - summary.totalMax),
     feeLabel: formatMoney(summary.feeAmount),
     materialCostLabel: formatMoneyRange(summary.materialCostMin, summary.materialCostMax),
     totalLabel: formatMoneyRange(summary.totalMin, summary.totalMax),
+    supportAppliedLabel: formatMoneyRange(
+      Math.max(0, summary.baseTotalMin - summary.totalMin),
+      Math.max(0, summary.baseTotalMax - summary.totalMax)
+    ),
+  };
+}
+
+function buildVoucherPreview(student, costSummary) {
+  if (!isVoucherEligible(student.grade)) {
+    return null;
+  }
+
+  const quarterLimit = 250000;
+  const yearlyLimit = 500000;
+  const usedMin = costSummary.baseTotalMin || 0;
+  const usedMax = costSummary.baseTotalMax || 0;
+
+  return {
+    quarterLimit,
+    yearlyLimit,
+    usedMin,
+    usedMax,
+    usedLabel: formatMoneyRange(usedMin, usedMax),
+    quarterRemainingMin: Math.max(0, quarterLimit - usedMax),
+    quarterRemainingMax: Math.max(0, quarterLimit - usedMin),
+    yearRemainingMin: Math.max(0, yearlyLimit - usedMax),
+    yearRemainingMax: Math.max(0, yearlyLimit - usedMin),
+    quarterRemainingLabel: formatMoneyRange(Math.max(0, quarterLimit - usedMax), Math.max(0, quarterLimit - usedMin)),
+    yearRemainingLabel: formatMoneyRange(Math.max(0, yearlyLimit - usedMax), Math.max(0, yearlyLimit - usedMin)),
   };
 }
 
@@ -327,6 +371,7 @@ async function getStudentPayload(studentId) {
     .map((slotId) => catalog[slotId])
     .filter(Boolean)
     .map((record) => buildSelectionDetail(record, student));
+  const costSummary = summarizeSelections(detailedSelections);
 
   return {
     student: {
@@ -346,7 +391,8 @@ async function getStudentPayload(studentId) {
     },
     selections,
     selectionDetails: detailedSelections,
-    costSummary: summarizeSelections(detailedSelections),
+    costSummary,
+    voucherPreview: buildVoucherPreview(student, costSummary),
   };
 }
 
@@ -446,6 +492,7 @@ async function buildAdminSummary() {
       remark: buildRemark(student, detailedSelections),
       selections: detailedSelections,
       costSummary: summarizeSelections(detailedSelections),
+      voucherPreview: buildVoucherPreview(student, summarizeSelections(detailedSelections)),
     };
   });
 

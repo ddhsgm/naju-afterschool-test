@@ -22,6 +22,9 @@ const state = {
   bootstrapError: "",
 };
 
+const VOUCHER_QUARTER_LIMIT = 250000;
+const VOUCHER_YEAR_LIMIT = 500000;
+
 const root = document.getElementById("appRoot");
 const studentCount = document.getElementById("studentCount");
 
@@ -166,18 +169,15 @@ function formatMoneyRange(min, max) {
 }
 
 function buildDraftCostSummary() {
-  if (state.student?.isFreePassEligible || state.student?.isVoucherEligible) {
-    return {
-      feeLabel: "0원",
-      materialLabel: "0원",
-      totalLabel: "0원",
-    };
-  }
-
   const summary = getSelectionsDetail(state.draftSelections).reduce(
     (acc, { course }) => {
       const feeAmount = parseFeeAmount(course.fee);
       const material = parseMaterialEstimate(course.note);
+      acc.baseFeeAmount += feeAmount;
+      acc.baseMaterialMin += material.min;
+      acc.baseMaterialMax += material.max;
+      acc.baseTotalMin += feeAmount + material.min;
+      acc.baseTotalMax += feeAmount + material.max;
       acc.feeAmount += feeAmount;
       acc.materialMin += material.min;
       acc.materialMax += material.max;
@@ -186,6 +186,11 @@ function buildDraftCostSummary() {
       return acc;
     },
     {
+      baseFeeAmount: 0,
+      baseMaterialMin: 0,
+      baseMaterialMax: 0,
+      baseTotalMin: 0,
+      baseTotalMax: 0,
       feeAmount: 0,
       materialMin: 0,
       materialMax: 0,
@@ -194,10 +199,45 @@ function buildDraftCostSummary() {
     }
   );
 
+  const supportCoversTotal = state.student?.isFreePassEligible || state.student?.isVoucherEligible;
+
+  if (supportCoversTotal) {
+    summary.feeAmount = 0;
+    summary.materialMin = 0;
+    summary.materialMax = 0;
+    summary.totalMin = 0;
+    summary.totalMax = 0;
+  }
+
   return {
+    baseFeeLabel: formatMoney(summary.baseFeeAmount),
+    baseMaterialLabel: formatMoneyRange(summary.baseMaterialMin, summary.baseMaterialMax),
+    baseTotalLabel: formatMoneyRange(summary.baseTotalMin, summary.baseTotalMax),
     feeLabel: formatMoney(summary.feeAmount),
     materialLabel: formatMoneyRange(summary.materialMin, summary.materialMax),
     totalLabel: formatMoneyRange(summary.totalMin, summary.totalMax),
+    supportAppliedLabel: formatMoneyRange(summary.baseTotalMin - summary.totalMin, summary.baseTotalMax - summary.totalMax),
+  };
+}
+
+function buildDraftVoucherPreview(costSummary) {
+  if (!state.student?.isVoucherEligible) {
+    return null;
+  }
+
+  const usedMin = costSummary.baseTotalMin || 0;
+  const usedMax = costSummary.baseTotalMax || 0;
+
+  return {
+    usedLabel: formatMoneyRange(usedMin, usedMax),
+    quarterRemainingLabel: formatMoneyRange(
+      Math.max(0, VOUCHER_QUARTER_LIMIT - usedMax),
+      Math.max(0, VOUCHER_QUARTER_LIMIT - usedMin)
+    ),
+    yearRemainingLabel: formatMoneyRange(
+      Math.max(0, VOUCHER_YEAR_LIMIT - usedMax),
+      Math.max(0, VOUCHER_YEAR_LIMIT - usedMin)
+    ),
   };
 }
 
@@ -412,6 +452,7 @@ function createSelectedSummary() {
   }
 
   const costSummary = buildDraftCostSummary();
+  const voucherPreview = buildDraftVoucherPreview(costSummary);
 
   return `
     <div class="selected-list">
@@ -426,18 +467,38 @@ function createSelectedSummary() {
     </div>
     <div class="summary-meta" style="margin-top:14px;">
       <div class="summary-item">
-        <label>예상 수강료</label>
-        <strong>${costSummary.feeLabel}</strong>
+        <label>지원 전 총액</label>
+        <strong>${costSummary.baseTotalLabel}</strong>
       </div>
       <div class="summary-item">
-        <label>예상 재료비</label>
-        <strong>${costSummary.materialLabel}</strong>
+        <label>지원 적용액</label>
+        <strong>${costSummary.supportAppliedLabel}</strong>
       </div>
       <div class="summary-item">
-        <label>예상 총부담</label>
+        <label>최종 예상 부담</label>
         <strong>${costSummary.totalLabel}</strong>
       </div>
     </div>
+    ${
+      voucherPreview
+        ? `
+          <div class="summary-meta" style="margin-top:14px;">
+            <div class="summary-item">
+              <label>이번 신청 바우처 사용액</label>
+              <strong>${voucherPreview.usedLabel}</strong>
+            </div>
+            <div class="summary-item">
+              <label>분기 예상 잔여</label>
+              <strong>${voucherPreview.quarterRemainingLabel}</strong>
+            </div>
+            <div class="summary-item">
+              <label>연간 예상 잔여</label>
+              <strong>${voucherPreview.yearRemainingLabel}</strong>
+            </div>
+          </div>
+        `
+        : ""
+    }
   `;
 }
 
