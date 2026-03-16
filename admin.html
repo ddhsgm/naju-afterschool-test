@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>나주중앙초 방과후 신청 관리자</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div class="page-shell">
+    <header class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">Naju Jungang Elementary School</p>
+        <h1>관리자 신청 현황</h1>
+        <p class="hero-text">
+          저장된 신청 내역을 중앙에서 확인하고, 누락 연락처 학생과 신청 현황을 한 번에 검토할 수 있습니다.
+        </p>
+      </div>
+      <div class="hero-card">
+        <div class="hero-stat">
+          <strong id="adminAppliedCount">-</strong>
+          <span>신청 학생 수</span>
+        </div>
+        <div class="hero-stat">
+          <strong id="adminSelectionCount">-</strong>
+          <span>총 신청 건수</span>
+        </div>
+      </div>
+    </header>
+
+    <main id="adminRoot" class="app-root"></main>
+  </div>
+
+  <script src="./admin.js"></script>
+</body>
+</html>
